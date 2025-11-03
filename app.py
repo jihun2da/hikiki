@@ -13,7 +13,7 @@ import io
 
 # 페이지 설정
 st.set_page_config(
-    page_title="OUR Shop",
+    page_title="hikiki Shop",
     page_icon="🛍️",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -27,8 +27,8 @@ DATA_DIR.mkdir(exist_ok=True)
 IMAGE_DIR = Path("image")
 
 # 관리자 계정 정보
-ADMIN_USERNAME = "our"
-ADMIN_PASSWORD = "our123"
+ADMIN_USERNAME = "hikiki"
+ADMIN_PASSWORD = "hikiki123"
 
 # CSS 스타일링
 st.markdown("""
@@ -244,7 +244,7 @@ def load_settings():
     return {
         "banner_slide_interval": 3,
         "banners": [],
-        "shop_name": "🌺 OAHU SHOP 🌺",
+        "shop_name": "🌺hikikiU SHOP 🌺",
         "shop_name_font_size": 48,
         "shop_name_color": "#333333",
         "notice": {
@@ -253,7 +253,7 @@ def load_settings():
             "enabled": True
         },
         "business_info": {
-            "company_name": "OAHU Shop",
+            "company_name": "hikiki Shop",
             "ceo_name": "대표자명",
             "business_number": "123-45-67890",
             "address": "서울특별시 강남구",
@@ -300,7 +300,7 @@ def save_inquiry(inquiry_data):
 def load_google_sheet_data():
     try:
         sheet_id = "1Cnd19QAMyNEgvEdfXTA1QtW0VMiTRMCBFGmrzKWezNQ"
-        gid = "531747363"  # OUR 시트
+        gid = "1691197225"  # hikiki 시트
         url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
         df = pd.read_csv(url)
         return df
@@ -417,7 +417,7 @@ def show_footer(settings):
     
     if business_info.get('enabled', False):
         # 사업자 정보 구성
-        company_name = business_info.get('company_name', 'OAHU Shop')
+        company_name = business_info.get('company_name', 'hikiki Shop')
         ceo_name = business_info.get('ceo_name', '')
         business_number = business_info.get('business_number', '')
         address = business_info.get('address', '')
@@ -457,7 +457,7 @@ def show_main_page():
     settings = load_settings()
     
     # 헤더 (상점명)
-    shop_name = settings.get('shop_name', '🌺 OAHU SHOP 🌺')
+    shop_name = settings.get('shop_name', '🌺hikikiU SHOP 🌺')
     shop_name_font_size = settings.get('shop_name_font_size', 48)
     shop_name_color = settings.get('shop_name_color', '#333333')
     
@@ -763,7 +763,7 @@ def show_admin_page():
         with col1:
             shop_name = st.text_input(
                 "상점명",
-                value=settings.get('shop_name', '🌺 OAHU SHOP 🌺'),
+                value=settings.get('shop_name', '🌺hikikiU SHOP 🌺'),
                 help="메인 페이지 상단에 표시될 상점명을 입력하세요"
             )
             
@@ -1120,7 +1120,7 @@ def show_admin_page():
         with col_a:
             company_name = st.text_input(
                 "상호",
-                value=business_info.get('company_name', 'OAHU Shop')
+                value=business_info.get('company_name', 'hikiki Shop')
             )
             ceo_name = st.text_input(
                 "대표자",
@@ -1143,17 +1143,17 @@ def show_admin_page():
             kakao_id = st.text_input(
                 "카카오톡 ID",
                 value=business_info.get('kakao_id', ''),
-                placeholder="예: @oahu_shop"
+                placeholder="예: @hikiki_shop"
             )
             instagram_id = st.text_input(
                 "인스타그램 ID",
                 value=business_info.get('instagram_id', ''),
-                placeholder="예: @oahu.official"
+                placeholder="예: @hikiki.official"
             )
             wechat_id = st.text_input(
                 "위챗 ID",
                 value=business_info.get('wechat_id', ''),
-                placeholder="예: oahu_wechat"
+                placeholder="예: hikiki_wechat"
             )
         
         if st.button("사업자 정보 저장", use_container_width=True):
