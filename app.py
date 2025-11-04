@@ -1249,119 +1249,197 @@ def show_admin_page():
     with tab7:
         st.subheader("Git 업데이트")
         
-        st.markdown("""
-        새 상품 이미지를 추가하거나 파일을 수정한 후 GitHub에 업로드합니다.
+        # 환경 감지 (Streamlit Cloud vs 로컬)
+        is_cloud = os.environ.get('STREAMLIT_RUNTIME_ENV') == 'cloud' or \
+                   'HOSTNAME' in os.environ or \
+                   not os.path.exists('.git')
         
-        **주의**: 이 기능은 로컬 환경에서만 작동합니다.
-        Streamlit Cloud에서는 GitHub 웹 인터페이스를 사용하세요.
-        """)
-        
-        commit_message = st.text_input(
-            "커밋 메시지",
-            value="Update products and settings",
-            placeholder="예: Add new product images"
-        )
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            if st.button("📝 Git Status", use_container_width=True):
-                try:
-                    result = subprocess.run(
-                        ['git', 'status', '--short'],
-                        capture_output=True,
-                        text=True,
-                        cwd=Path.cwd()
-                    )
-                    if result.stdout:
-                        st.code(result.stdout, language="text")
-                    else:
-                        st.success("변경사항이 없습니다.")
-                except Exception as e:
-                    st.error(f"오류: {e}")
-        
-        with col2:
-            if st.button("✅ Git Commit", use_container_width=True):
-                try:
-                    # Add all changes
-                    subprocess.run(['git', 'add', '-A'], check=True, cwd=Path.cwd())
-                    
-                    # Commit
-                    result = subprocess.run(
-                        ['git', 'commit', '-m', commit_message],
-                        capture_output=True,
-                        text=True,
-                        cwd=Path.cwd()
-                    )
-                    
-                    if result.returncode == 0:
-                        st.success("커밋이 완료되었습니다!")
-                        st.code(result.stdout, language="text")
-                    else:
-                        st.warning("커밋할 변경사항이 없거나 이미 커밋되었습니다.")
-                except Exception as e:
-                    st.error(f"오류: {e}")
-        
-        with col3:
-            if st.button("🚀 Git Push", use_container_width=True):
-                try:
-                    result = subprocess.run(
-                        ['git', 'push'],
-                        capture_output=True,
-                        text=True,
-                        cwd=Path.cwd()
-                    )
-                    
-                    if result.returncode == 0:
-                        st.success("GitHub에 푸시되었습니다!")
-                        st.info("Streamlit Cloud가 자동으로 재배포를 시작합니다.")
-                        st.code(result.stdout, language="text")
-                    else:
-                        st.error("푸시 실패")
-                        st.code(result.stderr, language="text")
-                except Exception as e:
-                    st.error(f"오류: {e}")
-        
-        st.markdown("---")
-        st.markdown("#### 한 번에 실행")
-        
-        if st.button("🔄 Add → Commit → Push", use_container_width=True, type="primary"):
-            try:
-                with st.spinner("Git 업데이트 중..."):
-                    # Add
-                    subprocess.run(['git', 'add', '-A'], check=True, cwd=Path.cwd())
-                    st.success("✅ 파일 추가 완료")
-                    
-                    # Commit
-                    result = subprocess.run(
-                        ['git', 'commit', '-m', commit_message],
-                        capture_output=True,
-                        text=True,
-                        cwd=Path.cwd()
-                    )
-                    
-                    if result.returncode == 0:
-                        st.success("✅ 커밋 완료")
-                        
-                        # Push
+        if is_cloud:
+            st.warning("""
+            ⚠️ **Streamlit Cloud 환경에서는 Git Push가 지원되지 않습니다.**
+            
+            아래 방법 중 하나를 사용하여 변경사항을 업로드하세요:
+            """)
+            
+            st.markdown("""
+            ### 📝 방법 1: GitHub 웹 인터페이스 사용 (권장)
+            
+            1. [GitHub 저장소](https://github.com) 접속
+            2. 파일 업로드 또는 직접 수정
+            3. Streamlit Cloud가 자동으로 재배포됩니다
+            
+            ---
+            
+            ### 🔧 방법 2: 로컬 환경에서 작업
+            
+            ```bash
+            # 1. 저장소 클론
+            git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
+            
+            # 2. 파일 수정 후
+            git add .
+            git commit -m "Update products"
+            git push origin main
+            ```
+            
+            ---
+            
+            ### 🔑 방법 3: GitHub Personal Access Token 설정 (고급)
+            
+            1. GitHub에서 Personal Access Token 생성
+            2. Streamlit Cloud의 Secrets에 토큰 추가:
+               ```toml
+               [github]
+               token = "your_personal_access_token"
+               ```
+            3. 앱 재시작
+            """)
+            
+            st.info("💡 **추천**: 설정 파일(settings.json, inquiries.json)은 자동으로 저장되므로, 이미지만 추가하면 됩니다.")
+            
+        else:
+            # 로컬 환경: Git 명령어 실행 가능
+            st.success("✅ 로컬 환경이 감지되었습니다. Git 명령어를 사용할 수 있습니다.")
+            
+            st.markdown("""
+            새 상품 이미지를 추가하거나 파일을 수정한 후 GitHub에 업로드합니다.
+            """)
+            
+            commit_message = st.text_input(
+                "커밋 메시지",
+                value="Update products and settings",
+                placeholder="예: Add new product images"
+            )
+            
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                if st.button("📝 Git Status", use_container_width=True):
+                    try:
                         result = subprocess.run(
-                            ['git', 'push'],
+                            ['git', 'status', '--short'],
+                            capture_output=True,
+                            text=True,
+                            cwd=Path.cwd()
+                        )
+                        if result.stdout:
+                            st.code(result.stdout, language="text")
+                        else:
+                            st.success("변경사항이 없습니다.")
+                    except Exception as e:
+                        st.error(f"오류: {e}")
+            
+            with col2:
+                if st.button("✅ Git Commit", use_container_width=True):
+                    try:
+                        # Add all changes
+                        subprocess.run(['git', 'add', '-A'], check=True, cwd=Path.cwd())
+                        
+                        # Commit
+                        result = subprocess.run(
+                            ['git', 'commit', '-m', commit_message],
                             capture_output=True,
                             text=True,
                             cwd=Path.cwd()
                         )
                         
                         if result.returncode == 0:
-                            st.success("✅ GitHub 푸시 완료!")
-                            st.balloons()
-                            st.info("Streamlit Cloud가 자동으로 재배포를 시작합니다. 약 2-3분 소요됩니다.")
+                            st.success("커밋이 완료되었습니다!")
+                            st.code(result.stdout, language="text")
+                        else:
+                            st.warning("커밋할 변경사항이 없거나 이미 커밋되었습니다.")
+                    except Exception as e:
+                        st.error(f"오류: {e}")
+            
+            with col3:
+                if st.button("🚀 Git Push", use_container_width=True):
+                    try:
+                        result = subprocess.run(
+                            ['git', 'push'],
+                            capture_output=True,
+                            text=True,
+                            cwd=Path.cwd(),
+                            timeout=30
+                        )
+                        
+                        if result.returncode == 0:
+                            st.success("GitHub에 푸시되었습니다!")
+                            st.info("Streamlit Cloud가 자동으로 재배포를 시작합니다.")
+                            st.code(result.stdout, language="text")
                         else:
                             st.error("푸시 실패")
                             st.code(result.stderr, language="text")
-                    else:
-                        st.warning("커밋할 변경사항이 없습니다.")
-            except Exception as e:
-                st.error(f"오류: {e}")
+                            
+                            # 인증 오류인 경우 추가 안내
+                            if "Authentication" in result.stderr or "could not read Username" in result.stderr:
+                                st.info("""
+                                **인증 오류 해결 방법:**
+                                
+                                1. SSH 키 사용:
+                                   ```bash
+                                   git remote set-url origin git@github.com:USERNAME/REPO.git
+                                   ```
+                                
+                                2. Personal Access Token 사용:
+                                   ```bash
+                                   git remote set-url origin https://TOKEN@github.com/USERNAME/REPO.git
+                                   ```
+                                """)
+                    except subprocess.TimeoutExpired:
+                        st.error("Git push 시간 초과. 네트워크를 확인하거나 인증 설정을 확인하세요.")
+                    except Exception as e:
+                        st.error(f"오류: {e}")
+            
+            st.markdown("---")
+            st.markdown("#### 한 번에 실행")
+            
+            if st.button("🔄 Add → Commit → Push", use_container_width=True, type="primary"):
+                try:
+                    with st.spinner("Git 업데이트 중..."):
+                        # Add
+                        subprocess.run(['git', 'add', '-A'], check=True, cwd=Path.cwd())
+                        st.success("✅ 파일 추가 완료")
+                        
+                        # Commit
+                        result = subprocess.run(
+                            ['git', 'commit', '-m', commit_message],
+                            capture_output=True,
+                            text=True,
+                            cwd=Path.cwd()
+                        )
+                        
+                        if result.returncode == 0:
+                            st.success("✅ 커밋 완료")
+                            
+                            # Push
+                            result = subprocess.run(
+                                ['git', 'push'],
+                                capture_output=True,
+                                text=True,
+                                cwd=Path.cwd(),
+                                timeout=30
+                            )
+                            
+                            if result.returncode == 0:
+                                st.success("✅ GitHub 푸시 완료!")
+                                st.balloons()
+                                st.info("Streamlit Cloud가 자동으로 재배포를 시작합니다. 약 2-3분 소요됩니다.")
+                            else:
+                                st.error("푸시 실패")
+                                st.code(result.stderr, language="text")
+                                
+                                if "Authentication" in result.stderr or "could not read Username" in result.stderr:
+                                    st.info("""
+                                    **인증 오류 해결 방법:**
+                                    - SSH 키를 설정하거나 Personal Access Token을 사용하세요.
+                                    - GitHub 웹 인터페이스에서 직접 파일을 업로드할 수도 있습니다.
+                                    """)
+                        else:
+                            st.warning("커밋할 변경사항이 없습니다.")
+                except subprocess.TimeoutExpired:
+                    st.error("Git push 시간 초과. 네트워크를 확인하거나 인증 설정을 확인하세요.")
+                except Exception as e:
+                    st.error(f"오류: {e}")
 
 # 메인 라우팅
 def main():
