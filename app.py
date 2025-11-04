@@ -763,7 +763,7 @@ def show_admin_page():
         with col1:
             shop_name = st.text_input(
                 "상점명",
-                value=settings.get('shop_name', '🌺hikikiU SHOP 🌺'),
+                value=settings.get('shop_name', '🌺hikiki SHOP 🌺'),
                 help="메인 페이지 상단에 표시될 상점명을 입력하세요"
             )
             
@@ -1382,3 +1382,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
