@@ -244,7 +244,7 @@ def load_settings():
     return {
         "banner_slide_interval": 3,
         "banners": [],
-        "shop_name": "🌺hikikiU SHOP 🌺",
+        "shop_name": "🌺hikiki SHOP 🌺",
         "shop_name_font_size": 48,
         "shop_name_color": "#333333",
         "notice": {
